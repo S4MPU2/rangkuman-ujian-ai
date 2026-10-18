@@ -1,0 +1,801 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Rangkuman Ujian AI - Minggu 1-7</title>
+<style>
+:root{
+  --bg:#0f172a;--panel:#1e293b;--panel2:#273549;--txt:#e2e8f0;--muted:#94a3b8;
+  --accent:#38bdf8;--accent2:#a78bfa;--good:#4ade80;--warn:#fbbf24;--bad:#f87171;--line:#3b4a63;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--txt);font-family:'Segoe UI',system-ui,-apple-system,Arial,sans-serif;line-height:1.6}
+header{position:sticky;top:0;z-index:50;background:linear-gradient(135deg,#1e3a8a 0%,#6d28d9 100%);padding:18px 16px 14px;text-align:center;box-shadow:0 3px 14px rgba(0,0,0,.45)}
+header h1{font-size:1.35rem;letter-spacing:.3px}
+header p{font-size:.85rem;opacity:.92;margin-top:2px}
+nav{max-width:960px;margin:14px auto 0;padding:0 14px;display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
+nav button{background:var(--panel2);color:var(--txt);border:1px solid var(--line);padding:.45rem .8rem;border-radius:999px;cursor:pointer;font-size:.82rem;transition:.15s}
+nav button:hover{border-color:var(--accent);color:var(--accent)}
+main{max-width:960px;margin:0 auto;padding:16px 14px 60px}
+.intro{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px 16px;margin-bottom:18px;font-size:.9rem;color:var(--muted)}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;margin-bottom:16px;overflow:hidden}
+.card-head{display:flex;align-items:center;gap:12px;padding:14px 16px;cursor:pointer;user-select:none}
+.card-head:hover{background:var(--panel2)}
+.badge{flex:none;width:42px;height:42px;border-radius:10px;background:linear-gradient(135deg,#2563eb,#7c3aed);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.95rem}
+.card-head h2{font-size:1.02rem;flex:1}
+.card-head .tag{font-size:.7rem;background:#0f172a;border:1px solid var(--line);color:var(--accent);padding:2px 8px;border-radius:999px;white-space:nowrap}
+.chev{transition:.2s;color:var(--muted);font-weight:700}
+.card.open .chev{transform:rotate(90deg)}
+.card-body{display:none;padding:4px 18px 18px;border-top:1px dashed var(--line)}
+.card.open .card-body{display:block}
+.card-body h3{font-size:.95rem;color:var(--accent);margin:16px 0 6px;padding-left:9px;border-left:3px solid var(--accent)}
+.card-body ul,.card-body ol{margin:4px 0 8px 20px}
+.card-body li{margin:3px 0;font-size:.9rem}
+.card-body p{font-size:.9rem;margin:6px 0}
+.kbd{background:#0b1220;border:1px solid var(--line);padding:1px 6px;border-radius:5px;font-size:.82rem;color:var(--warn);font-family:Consolas,monospace}
+table{width:100%;border-collapse:collapse;margin:8px 0 12px;font-size:.82rem}
+th,td{border:1px solid var(--line);padding:6px 8px;text-align:left;vertical-align:top}
+th{background:var(--panel2);color:var(--accent)}
+td.yes{color:var(--good);font-weight:700}
+td.no{color:var(--bad);font-weight:700}
+.tip{background:#132a4a;border-left:4px solid var(--accent);padding:8px 12px;border-radius:0 8px 8px 0;margin:8px 0;font-size:.87rem}
+.warn{background:#3a2e13;border-left:4px solid var(--warn);padding:8px 12px;border-radius:0 8px 8px 0;margin:8px 0;font-size:.87rem}
+.exam{background:#3a1533;border-left:4px solid var(--bad);padding:8px 12px;border-radius:0 8px 8px 0;margin:8px 0;font-size:.87rem}
+footer{text-align:center;color:var(--muted);font-size:.8rem;padding:20px 14px 34px}
+@media (max-width:560px){.card-head h2{font-size:.92rem}.card-head .tag{display:none}}
+</style>
+</head>
+<body>
+<header>
+  <h1>Rangkuman Ujian Kecerdasan Buatan</h1>
+  <p>Materi Ringkas dan Terperinci - Modul Minggu 1 sampai 7 (IF25-22016)</p>
+</header>
+<nav id="nav"></nav>
+<main>
+  <div class="intro">
+    <strong>Cara pakai:</strong> klik judul modul untuk membuka atau menutup ringkasan. Setiap poin sudah
+    dipadatkan dari slide perkuliahan, lengkap dengan <em>tips ujian</em> dan tabel hafalan cepat.
+    Tombol di atas bisa melompat langsung ke modul tertentu.
+  </div>
+  <div id="modules"></div>
+</main>
+<footer>Dibuat untuk persiapan ujian besok - Sumber: slide kuliah Minggu 1-7 dan Russell-Norvig (AIMA)</footer>
+<script>
+const DATA = [
+{
+  tag:'M1',
+  title:'Pendahuluan Artificial Intelligence',
+  short:'Dasar-konsep AI, 4 pendekatan, Turing Test, penerapan AI.',
+  html:`<h3>Identitas Mata Kuliah</h3>
+<ul>
+  <li><b>Kode:</b> IF25-22016, 3 SKS Wajib, semester 4.</li>
+  <li><b>Prasyarat:</b> Probabilitas &amp; Statistika, Strategi Algoritma; co-req: Teori Bahasa Formal &amp; Otomata.</li>
+  <li><b>Penilaian:</b> Quiz 10%, Tugas Mandiri 10%, Kelompok 30%, UTS 20%, UAS 30%.</li>
+  <li><b>Referensi:</b> Russell &amp; Norvig, <i>AI: A Modern Approach</i> (4th ed).</li>
+</ul>
+
+<h3>Empat Pendekatan AI</h3>
+<table>
+  <tr><th>Pendekatan</th><th>Inti</th><th>Contoh</th></tr>
+  <tr><td><b>1. Acting Humanly</b></td><td>Tingkah lah seperti manusia (Turing Test)</td><td>Chatbot, Google Translate, robot catur</td></tr>
+  <tr><td><b>2. Thinking Humanly</b></td><td>Mengulangi/kopia proses berpikir manusia</td><td>AI tutor, sistem rekomendasi adaptif</td></tr>
+  <tr><td><b>3. Thinking Rationally</b></td><td>Penalaran logis yang benar (logika, aturan)</td><td>Sistem pakar, Legal Tech, inferensi otomatis</td></tr>
+  <tr><td><b>4. Acting Rationally</b></td><td>Agen memilih aksi terbaik demi tujuan</td><td>Self-driving, robot gudang, trading bot</td></tr>
+</table>
+
+<div class="tip"><b>Perhatikan!</b> Pendekatan utama materi ini = <b>Thinking Rationally</b> dan <b>Acting Rationally</b>.
+  <br>Empat pendekatan berhubungan: "Acting Humanly" → "Thinking Humanly" → "Thinking Rationally" → "Acting Rationally".</div>
+
+<h3>Turing Test (Acting Humanly)</h3>
+<ul>
+  <li>Ide: jika manusia tidak bisa bedakan, AI "berpikir" seperti manusia.</li>
+  <li>Bukan bukti pemahaman; sering menekankan trik linguistik, bukan kecerdasan umum.</li>
+  <li>Implementasi: Loebner Prize (Mitsuku/Juki), Chatbot modern (ChatGPT, Claude, Gemini).</li>
+  <li>Keterbatasan: meniru ≠ memahami; kecerdasan ≠ kesadaran; sulit diukur; risiko etika.</li>
+</ul>
+
+<h3>Penerapan AI Sekarang</h3>
+<ul>
+  <li><b>Acting Humanly:</b> Chatbot generatif, asisten suara (Siri, Alexa), layanan pelanggan virtual.</li>
+  <li><b>Thinking Humanly:</b> AI Tutor (Khanmigo), computer vision, rekomendasi adaptif.</li>
+  <li><b>Thinking Rationally:</b> IBM Watson Health, sistem pakar, legal tech (Luminance).</li>
+  <li><b>Acting Rationally:</b> Tesla FSD, Amazon Kiva, AlphaZero (catur/Go), trading bot.</li>
+</ul>
+`},
+{
+  tag:'M2',
+  title:'Intelligent Agent',
+  short:'Konsep agent, PEAS, 5 tipe agent, jenis environment.',
+  html:`<h3>Apa itu Agent?</h3>
+<ul>
+  <li><b>Agent</b>: segala hal yang dapat <em>memperoleh info (perceiving)</em> dari environment-nya melalui <b>sensor</b> dan <b>bertindak (acting)</b> pada environment melalui <b>effectors</b>.</li>
+  <li>Definisi: <i>Perangkat lunak yang mengumpulkan informasi terkait environment dan mengambil aksi.</i></li>
+  <li>Contoh: robot, search engine, asisten virtual.</li>
+</ul>
+
+<h3>Agent vs AI Model</h3>
+<table>
+  <tr><th></th><th>AI Model</th><th>Intelligent Agent</th></tr>
+  <tr><td>Input/output</td><td>Menerima input → hasilkan output</td><td>Memilih aksi → capai tujuan</td></tr>
+  <tr><td>Nature</td><td>Sering pasif</td><td>Berinteraksi dengan environment</td></tr>
+  <tr><td>Contoh</td><td>Classifier MRI</td><td>Clinical decision-support agent</td></tr>
+</table>
+<p>Model jadi bagian agent <em>bila dipakai untuk memilih aksi di task environment</em>.</p>
+
+<h3>PEAS</h3>
+<ul>
+  <li><b>Performance measure:</b> ukuran keberhasilan. <b>Environment:</b> kondisi sekeliling agent.</li>
+  <li><b>Actuators:</b> apa yang bisa dilakukan agent. <b>Sensors:</b> apa yang diterima agen.</li>
+</ul>
+
+<h3>Contoh PEAS</h3>
+<table>
+  <tr><th>Agent</th><th>P</th><th>E</th><th>A</th><th>S</th></tr>
+  <tr><td>Robot penyedot debu</td><td>Lantai bersih, efisien energi</td><td>Ruangan, dinding, rintangan</td><td>Motor roda, vacuum</td><td>Sensor debu, jarak, benturan</td></tr>
+  <tr><td>e-Commerce recommender</td><td>Penjualan naik, kepuasan, retensi</td><td>Produk, DB penjual, perilaku user</td><td>Rekomendasi, notifikasi</td><td>Riwayat belanja, klik, rating</td></tr>
+  <tr><td>Delivery robot</td><td>Paket tepat waktu, aman, hemat</td><td>Trotoar kampus, cuaca, rambu</td><td>Roda, rem, speaker, lampu</td><td>Kamera, GPS, lidar, sensor</td></tr>
+</table>
+
+<h3>Lima Tipe Agent (tingkat kompleksitas naik kiri→kanan)</h3>
+<ol>
+  <li><b>Simple reflex agent:</b> hanya pakai <b>rule IF-THEN</b> berdasarkan persepsi terbaru. <em>Percept → Condition-Action rule</em>.</li>
+  <li><b>Model-based reflex agent:</b> punya <b>representasi internal</b> tentang state environment. Bisa handle observasi sebagian.</li>
+  <li><b>Goal-based agent:</b> punya <b>tujuan (goal)</b>. Pilih aksi yang mencapai goal. Cocog multi-jalur.</li>
+  <li><b>Utility-based agent:</b> punya <b>utility function</b> — nilai tiap keadaan. Pilih aksi maksimalkan ekspektasi utilitas. Handle trade-off (misal: aman vs cepat).</li>
+  <li><b>Learning agent:</b> <b>meningkatkan kinerja</b> dari pengalaman (performance feedback → explore/learn).</li>
+</ol>
+
+<div class="tip"><b>Struktur semua agent sama:</b> <b>function → model/policy → utility</b> (jika ada) → <b>learning</b> (jika ada).</div>
+
+<h3>Environment (6 properti kunci)</h3>
+<table>
+  <tr><th>#</th><th>Ciri</th><th>Penuh / Parsial</th><th>Contoh</th></tr>
+  <tr><td>1. Observable?</td><td>Fully vs Partially observable</td><td>info lengkap vs sebagian</td><td>catur (full) vs AV (partial)</td></tr>
+  <tr><td>2. Deterministic?</td><td>Deterministic vs Stochastic</td><td>akibat pasti vs acak</td><td>robot Rubik (deter) vs AV (stochastik)</td></tr>
+  <tr><td>3. Episodic?</td><td>Episodic vs Sequential</td><td>tindak-terpisah vs berurutan</td><td>deteksi spam (episodik) vs AV (sekuensial)</td></tr>
+  <tr><td>4. Static?</td><td>Static vs Dynamic</td><td>tak berubah saat berpikir</td><td>catur (static) vs lalu-lintas AV (dinamis)</td></tr>
+  <tr><td>5. Discrete?</td><td>Discrete vs Continuous</td><td>state diskrit vs kontinu</td><td>catur (diskrit) vs kemudi (kontinu)</td></tr>
+  <tr><td>6. Single-agent?</td><td>Single vs Multi-agent</td><td>1 agen vs >1 agen</td><td>vacuum (single) vs game (multi)</td></tr>
+</table>
+<div class="tip">Di dunia nyata, environment biasanya: <b>parial, stochastik, sekuensial, dinamis, kontinu, multi-agent</b> → ini menentukan desain agen.</div>
+
+<h3>Agent Klasik vs LLM-Based Agent</h3>
+<table>
+  <tr><th></th><th>Agent Klasik</th><th>LLM Agent</th></tr>
+  <tr><td>Model</td><td>Rule/policy/pola eksplisit</td><td>Bernalar via language model</td></tr>
+  <tr><td>Action space</td><td>Terbatas</td><td>Pilih tools/API sesuai tugas</td></tr>
+  <tr><td>Environment</td><td>Simulasi/terstruktur</td><td>Web, file, database, terminal</td></tr>
+  <tr><td>Evaluasi</td><td>Relatif terukur</td><td>Akurasi, safety, biaya, latency, traceability</td></tr>
+</table>
+<p><b>Agentic AI bukan pengganti</b> agent klasik — melainkan perluasan dengan <b>model + tools + memory + planning + oversight</b>.</p>
+`},
+{
+  tag:'M3',
+  title:'Problem Solving & Searching',
+  short:'Logika, problem solving agent, state space, cara ukur pencarian.',
+  html:`<h3>Logika = Dasar Penalaran</h3>
+<ul>
+  <li><b>Logika</b> = bahasa formal untuk menyimpan aturan &amp; validasi kesimpulan, lalu inferensi.</li>
+  <li>Bi-conditional tdk diuji detail; <b>fokus</b>: logika membantu agent untuk <b>menalar terkontrol</b> (aturan, validasi, constraint).</li>
+  <li>Aturan modern: <span class="kbd">IF confidence &lt; X THEN human-verification</span>, <span class="kbd">IF stale THEN do-not-recommend</span>.</li>
+</ul>
+
+<h3>Problem Solving Agent</h3>
+<ul>
+  <li>Intelligent agent otomatis yang: <b>mendefinisikan tujuan → representasikan masalah → mencari solusi (urutan aksi)</b>.</li>
+  <li>Goal terhubung ke aksi/rencana; agent berlogika untuk mencapai goal.</li>
+</ul>
+
+<h3>6 Komponen Masalah</h3>
+<table>
+  <tr><th>#</th><th>Komponen</th><th>Maksud</th></tr>
+  <tr><td>1</td><td><b>Initial state</b></td><td>Kondisi awal sebelum solusi</td></tr>
+  <tr><td>2</td><td><b>Goal state</b></td><td>Kondisi tujuan yang ingin dicapai</td></tr>
+  <tr><td>3</td><td><b>State space</b></td><td>Semua kemungkinan keadaan yang bisa dicapai</td></tr>
+  <tr><td>4</td><td><b>Actions/operators</b></td><td>Langkah yang bisa diambil</td></tr>
+  <tr><td>5</td><td><b>Transition model</b></td><td>Efek aksi: mengubah state menjadi state baru</td></tr>
+  <tr><td>6</td><td><b>Path cost</b></td><td>Total bobot aksi menuju goal (jarak/waktu/energi/risk)</td></tr>
+</table>
+
+<div class="warn"><b>Contoh</b> (dikecilkan, biar mud diuji):<br>
+Robot rumah→kampus: <b>init</b>=di rumah, <b>goal</b>=di kampus, <b>aksi</b>=keluar/jalan/naik motor,<br>
+<b>transisi</b>=posisi berubah, <b>path cost</b>=jarak+waktu+uang.<br>
+- Task agent modern: init=belum tahu jawaban, goal=ringkasan berbasis sumber, aksi=search/open/summarize/save.
+</div>
+
+<h3>Searching</h3>
+<ul>
+  <li><b>Searching</b> = mencari <b>urutan aksi</b> dari initial state ke goal state dengan menjelajahi <b>state space</b>.</li>
+  <li>Di balik layar: setiap state = <b>node</b>, aksi = <b>edge</b>, biaya = <b>path cost</b>, berhenti saat <b>goal test</b>.</li>
+  <li><b>Search strategy</b> = algoritma yang dipakai agent untuk menemukan solusi.</li>
+</ul>
+<div class="tip">Pemetaan dunia nyata: <b>Node</b>=lokasi/konfig/status • <b>Edge</b>=aksi •
+<b>Cost</b>=waktu/jarak/energi/uang/risk • <b>Goal test</b>=syarat berhenti.</div>
+
+<h3>5 Strategi Pencarian (Bedakan betul!)</h3>
+<table>
+  <tr><th>#</th><th>Strategi</th><th>Ciri utama</th><th>Contoh</th></tr>
+  <tr><td>1</td><td><b>Uninformed (blind)</b></td><td>Tanpa info tambahan; coba-coba</td><td>BFS, DFS, UCS, DLS, IDS</td></tr>
+  <tr><td>2</td><td><b>Informed (heuristic)</b></td><td>Pakai heuristik <span class="kbd">h(n)</span> untuk cepat</td><td>Greedy, Best-First, A*</td></tr>
+  <tr><td>3</td><td><b>Local search</b></td><td>Perbaiki solusi sementara (path irrelevant)</td><td>Hill climbing, GA, Simulated Annealing</td></tr>
+  <tr><td>4</td><td><b>Adversarial</b></td><td>Lingkungan kompetitif, agen berlawanan</td><td>Minimax, Alpha-Beta</td></tr>
+  <tr><td>5</td><td><b>CSP</b></td><td>Tujuan: penuhi semua constraint</td><td>Backtracking, FC, AC</td></tr>
+</table>
+
+<h3>4 Kriteria Ukur Performa</h3>
+<table>
+  <tr><th>Kriteria</th><th>Arti</th></tr>
+  <tr><td><b>Completeness</b></td><td>Menemukan solusi jika memang ada?</td></tr>
+  <tr><td><b>Optimality</b></td><td>Menemukan solusi <b>terbaik</b>?</td></tr>
+  <tr><td><b>Time complexity</b></td><td>Node/langkah dieksplorasi (big-O dengan <span class="kbd">b</span>=cabang, <span class="kbd">d</span>=kedalaman solusi, <span class="kbd">m</span>=kedalaman maks)</td></tr>
+  <tr><td><b>Space complexity</b></td><td>Memori yang dibutuhkan</td></tr>
+</table>
+
+<h3>Perbandingan Cepat</h3>
+<table>
+  <tr><th>Algoritma</th><th>Complete?</th><th>Optimal?</th><th>Catatan</th></tr>
+  <tr><td>BFS</td><td class="yes">Ya (b terbatas)</td><td class="yes">Ya (cost sama)</td><td>Solusi terpendek, tapi boros memori</td></tr>
+  <tr><td>DFS</td><td class="no">Tidak</td><td class="no">Tidak</td><td>Hemat memori, bisa terjebak tak hingga</td></tr>
+  <tr><td>UCS</td><td class="yes">Ya</td><td class="yes">Ya (cost min)</td><td>Cocok cost berbeda</td></tr>
+  <tr><td>Greedy</td><td class="yes">Ya*</td><td class="no">Tidak selalu</td><td>Cepat, bisa terjebak lokal</td></tr>
+  <tr><td>A*</td><td class="yes">Ya</td><td class="yes">Ya (jika admissible)</td><td>Paling optimal, tapi boros memori</td></tr>
+</table>
+
+<div class="exam"><b>Soal ujian populer:</b> “Jelaskan state space, initial &amp; goal state dari kasus X”
+→ hafalkan 6 komponen + contoh robot.</div>
+`},
+{
+  tag:'M4',
+  title:'Metode Searching',
+  short:'BFS, DFS, UCS, IDS, GBFS, A* - karakteristik, tabel, contoh.',
+  html:`<h3>Uninformed Search (Blind Search)</h3>
+<p>Tidak ada pengetahuan tambahan selain definisi masalah → pencarian seperti “coba-coba”.</p>
+
+<h4>1. Breadth-First Search (BFS)</h4>
+<ul>
+  <li>Jelajahi <b>level demi level</b> dari akar sampai ketemu goal.</li>
+  <li>Implementasi: queue; simpan semua node level sebelum turun.</li>
+  <li><b>Sifat:</b> ✅ Complete (b terbatas) ✅ Optimal (biaya sama) ❌ Boros ruang (O(b^d)).</li>
+  <li><b>Rute:</b> A→C→F→D→B→E→G (level per level).</li>
+</ul>
+<div class="tip">Komentar: <b>BFS selalu menemukan solusi terpendek</b> jika semua langkah punya biaya seragam.</div>
+
+<h4>2. Depth-First Search (DFS)</h4>
+<ul>
+  <li>Jelajahi <b>mendalam satu jalur</b> hingga ujung pohon, baru <b>backtrack</b> untuk cabang lain.</li>
+  <li>Implementasi: stack; tidak perlu menyimpan semua level.</li>
+  <li><b>Sifat:</b> ❌ Tidak Complete (terjebak tak hingga) ❌ Tidak Optimal. Hemat memori.</li>
+  <li><b>Rute:</b> A→B→E→F→C→D→G (dalam panduan).</li>
+</ul>
+
+<h4>3. Uniform Cost Search (UCS)</h4>
+<ul>
+  <li>Pilih node dengan <b>biaya kumulatif terkecil</b> (bukan hanya langkah).</li>
+  <li>Implementasi: priority queue (frontier) urutakan berdasarkan total cost g(n).</li>
+  <li><b>Sifat:</b> ✅ Complete ✅ Optimal (cost minimum).</li>
+  <li><b>Rute:</b> A → B(2) → E(3) → G(6) menggunakan cost tiap tepi.</li>
+</ul>
+
+<h4>4. Depth-Limited Search (DLS)</h4>
+<ul>
+  <li>VARIAN DFS dengan <b>batas kedalaman L</b>. Jika melewati L, <b>backtrack</b>.</li>
+  <li><b>Sifat:</b> ❌ Tidak Complete (solusi mungkin di level > L). Hemat memori.</li>
+</ul>
+
+<h4>5. Iterative Deepening Search (IDS) / Illuminated DFS</h4>
+<ul>
+  <li>Gabungan: lakukan DLS berulang dengan L=1,2,3,… sampai ketemu solusi.</li>
+  <li><b>Sifat:</b> ✅ Complete ✅ Optimal (jika cost per langkah sama) • Seperti DFS ruang).
+</ul>
+<p>Keuntungan: kompleksitas waktu serupa DFS, tapi memiliki keunggulan BFS.</p>
+
+<h3>Informed Search (Heuristic Search)</h3>
+<p>Gunakan <span class="kbd">h(n)</span> = estimasi biaya jarak ke goal untuk mempercepat pencarian.</p>
+
+<h4>Greedy Best-First Search (GBFS)</h4>
+<ul>
+  <li>Pilih node berikutnya dengan <span class="kbd">h(n)</span> terkecil (k liat goal).</li>
+  <li><b>Sifat:</b> ✅ Complete (b terbatas) ❌ Tidak optimal (terjebak jalur kelihatan dekat tapi panjang).</li>
+  <li>Eksponensial; sangat cepat tapi tidak menjamin solusi terbaik.</li>
+  <li><b>Contoh:</b> Rute Bandung→Yogyakarta via Tasikmalaya→Purwokerto→Kebumen (bukan rute paling cepat).</li>
+</ul>
+<div class="warn">⚠️ Sering kali GBFS tercekik di “dead end” karena hanya panduan visual.</div>
+
+<h4>A* Search (A-star)</h4>
+<ul>
+  <li>Gabungkan: <span class="kbd">f(n) = g(n) + h(n)</span>
+    <ul><li><span class="kbd">g(n)</span>: biaya nyata dari start ke node.</li><li><span class="kbd">h(n)</span>: estimasi ke goal (heuristik).</li></ul>
+  </li>
+  <li><b>Sifat:</b> ✅ Complete ✅ Optimal (jika <span class="kbd">h(n)</span> admissible, tidak lebih →).
+  </li>
+  <li>Kompleksitas: waktu tergantung heuristik, ruang: O(b^d) — menyimpan semua node terbuka.</li>
+  <li><b>Contoh nyata:</b> Rute jalan Bandung→Yogyakarta Optimal 328 km via IDS/UCS/GBFS/A*.
+</ul>
+<div class="tip">Intuisi A* = UCS + “petunjuk arah”. Semakin akurat h(n), semakin cepat.</div>
+
+<h3>Tabel Perbandingan (Ganti-kapasitas-hafalan)</h3>
+<table>
+  <tr><th>Algoritma</th><th>Complete</th><th>Optimal</th><th>Time</th><th>Space</th><th>Catatan</th></tr>
+  <tr><td>BFS</td><td class="yes">Ya (b ≤)</td><td class="yes">Ya (cost =)</td><td>O(b^d)</td><td>O(b^d)</td><td>Solusi terpendek, muter-muter</td></tr>
+  <tr><td>DFS</td><td class="no">Tidak</td><td class="no">Tidak</td><td>O(b^m)</td><td>O(b·m)</td><td>Hemat ruang, sering kelaparan</td></tr>
+  <tr><td>UCS</td><td class="yes">Ya</td><td class="yes">Ya</td><td>O(b^C)</td><td>O(b^C)</td><td>Untuk edge cost ≠ 1</td></tr>
+  <tr><td>GBFS</td><td class="yes">Ya*</td><td class="no">Tidak</td><td>O(b^m)</td><td>O(b^m)</td><td>Cepat tapi biasa tidak optimal</td></tr>
+  <tr><td>A*</td><td class="yes">Ya</td><td class="yes">Ya (admissible)</td><td>O(b^d)</td><td>O(b^d)</td><td>Paling kuat, tapi butuh memori besar</td></tr>
+</table>
+
+<div class="exam"><b>Tips ujian:</b> Selalu sebutkan tiga hal bila bandingkan algoritma:
+  <ol><li>Completeness/optimalitas</li><li>Kompleksitas waktu &amp; ruang</li><li>Ketentuan (kapan pakai, kapan tidak)</li></ol>
+</div>
+`},
+{
+  tag:'M5',
+  title:'Constraint Satisfaction Problem (CSP)',
+  short:'Komponen CSP, backtracking, heuristik, AC-3.',
+  html:`<h3>Apa itu CSP?</h3>
+<p><b>CSP</b> = model AI dalam bentuk <b>pencarian problem</b> di mana solusinya harus memenuhi <b>variabel + domain + constraint</b>.</p>
+<p>Bedanya dengan standard search: fokus pada <b>assignment nilai</b> yang valid, <b>bukan path dari initial→goal</b>. <em>Path irrelevant</em>.</p>
+
+<h3>3 Komponen CSP</h3>
+<table>
+  <tr><th>#</th><th>Komponen</th><th>Arti</th><th>Contoh (map coloring)</th></tr>
+  <tr><td>1</td><td><b>Variabel (X)</b></td><td>Sesuatu yang harus diberi nilai</td><td>Setiap daerah {WA, NT, Q, NSW, SA, V, T}</td></tr>
+  <tr><td>2</td><td><b>Domain (D)</b></td><td>Himpunan nilai yang mungkin</td><td>3 warna {Red, Green, Blue}</td></tr>
+  <tr><td>3</td><td><b>Constraint (C)</b></td><td>Aturan/batasan kombinasi</td><td>Daerah bertetangga warna berbeda</td></tr>
+</table>
+<p><b>Solusi CSP</b> = complete &amp; consistent assignment (setiap variabel punya nilai, semua constraint terpenuhi).</p>
+
+<h3>CSP vs Standard Search</h3>
+<table>
+  <tr><th>Aspek</th><th>Standard Search</th><th>CSP</th></tr>
+  <tr><td>Makna</td><td>Jalur dari initial → goal</td><td>Penugasan nilai variabel</td></tr>
+  <tr><td>Solusi</td><td>Path (sequence of actions)</td><td>Assignment (setiap variabel)</td></tr>
+  <tr><td>Heuristik</td><td>Penting (mis. A*)</td><td>Terdapat (MRV, Degree), tapi intinya <b>constraint checking</b></td></tr>
+</table>
+
+<h3>Backtracking Search = DFS untuk CSP</h3>
+<p>Menyusun nilai variabel satu per satu (depth-first), mundur jika buntu.</p>
+<ol>
+  <li>Berikan nilai satu variabel (acak/urut).</li>
+  <li>Periksa constraint → konsisten lanjut ke variabel berikutnya; tidak konsisten coba nilai lain.</li>
+  <li>Jika tidak ada nilai yang cocok → <b>backtrack</b> ke variabel sebelumnya.</li>
+  <li>Ulangi sampai semua variabel terisi valid atau terbukti tak ada solusi.</li>
+</ol>
+<div class="tip">Karena kompleksitasnya eksponensial O(d^n), <b>penting optimasi</b>.</div>
+
+<h3>Heuristik Backtracking (hafalkan urutan dan maknanya)</h3>
+<ol>
+  <li><b>MRV (Minimum Remaining Values):</b> Pilih variabel dengan <b>domain tersisa paling sedikit</b> (fail-fast).</li>
+  <li><b>Degree Heuristic:</b> Jika seri MRV, pilih variabel yang <b>memengaruhi paling banyak</b> variabel lain (tie-break).</li>
+  <li><b>LCV (Least Constraining Value):</b> Pilih nilai yang <b>paling sedikit membatasi</b> variabel lain.</li>
+</ol>
+
+<h3>Propagasi Constraint (pemangkin ruang pencarian)</h3>
+<ul>
+  <li><b>Node consistency:</b> nilai variabel konsisten dengan <em>unary</em> constraint.</li>
+  <li><b>Arc consistency:</b> nilai variabel konsisten dengan <em>binary</em> constraint.</li>
+  <li><b>Path consistency:</b> konsisten dengan implisit 3-variabel.</li>
+  <li><b>k-Consistency:</b> konsisten dengan <em>higher-order</em> constraint.</li>
+</ul>
+
+<h4>Forward Checking</h4>
+<ul><li>Memantau <b>domain yang tersisa</b> pada variabel yang belum diisi.</li><li><b>Berhenti</b> jika variabel kehabatan nilai legal.</li></ul>
+
+<h4>Arc Consistency (AC-3)</h4>
+<ul>
+<li>Buat <b>antrian arc</b>; pop tiap arc (X,Y), hapus nilai X tak punya pasangan valid Y.</li>
+<li>Jika domain X berubah, masukkan arc (Z,X) kembali — <b>propagasi</b>.</li>
+<li><b>Deteksi dini kegagalan</b> lebih cepat dibanding forward checking.</li>
+</ul>
+<div class="warn">🔄 <b>Urutan biasanya:</b> Pilih variabel (MRV→Degree) → Pilih nilai (LCV) → Cek constraint (Forward Checking) → Akibatkan (AC-3).</div>
+
+<h3>Contoh Kasus nyata</h3>
+<ul>
+  <li><b>Penjadwalan kuliah</b>: var=waktu, domain=slot, constraint=dosen/ruangan tak bentrok.</li>
+  <li><b>Warna peta (Sudoku/N-Queens)</b>: angka 1-9 tak bertemu di baris/kolom/blok.</li>
+  <li><b>Alokasi sumber daya</b>: pekerja tidak boleh kerja ganda.</li>
+  <li><b>Rute bus</b>: kapasitas jalan tidak boleh berlebih.</li>
+  <li><b>Spesifikasi konfigurasi</b>: CPU kompatibel dengan motherboard.</li>
+</ul>
+
+<div class="exam">
+Soal klasik: "Kenapa Arc Consistency penting?"<br>
+→ <b>Membantu mendeteksi kegagalan lebih awal</b> dan memangkas ruang pencarian ekstrim.
+</div>
+`},
+{
+  tag:'M6',
+  title:'Beyond Classical Search',
+  short:'Adversarial search (Minimax, α-β), Local search (Hill, SA, GA).',
+  html:`<h3>Local Search</h3>
+<p>Strategi yang <b>tidak menjelajah seluruh ruang</b> — hanya membutuhkan <b>state tujuan</b> (complete solution → <b>complete &amp; consistent</b>). Fokus perbaikan <b>solusi sementara</b>.</p>
+
+<h4>1. Hill-Climbing (Greedy Local Search)</h4>
+<ul>
+  <li>Selalu bergerak ke neighbor dengan nilai <span class="kbd">h</span> terbaik saat itu.</li>
+  <li>Analog: pendaki di tengah kabut — hanya bisa melihat langkah dekat, tak bisa muslihat jauh.</li>
+</ul>
+<div class="exam"><b>Simulasi 8-queens:</b><br>
+Heuristik <span class="kbd">h</span> = jumlah pasangan queen yang <b>tidak saling serang</b>.<br>
+Setiap putaran: hitung h tiap neighbor (ubah posisi 1 queen), pilih nilai tertinggi, berhenti bila tidak ada peningkatan.</div>
+
+<h3>Kelemahan Hill-Climbing vs Solusi</h3>
+<ul>
+  <li><b>Local maxima</b>: terjebak nilai lokal — solution tidak terbaik <em>global</em>.</li>
+  <li><b>Plateau/shoulder</b>: nilai sama — perlu <b>sideways move</b> (gerakan ke samping, batasi iterasi).</li>
+</ul>
+<div class="tip">Strategi perbaikan: <b>Stochastic Hill-Climbing</b> (pilih acak di antara candit), <b>Random Restart</b> (cari ulang dari awal; efektif untuk 8-queens).</div>
+
+<h4>2. Simulated Annealing (SA)</h4>
+<ul>
+  <li>Terinspirasi <b>proses pemadatan logam</b>: dulu tinggi (acak), <b>temperatur menurun</b> → semakin selektif (stabil).</li>
+  <li>Mengijinkan <b>solusi lebih buruk</b> dengan peluang (probabilitas) tertentu → keluar dari local optima.</li>
+  <li><b>Alur:</b> Pilih neighbor random → hitung ΔE dan temperatur → terima jika lebih baik ATAU dengan probabilitas.</li>
+  <li>Jika suhu menurun cukup lambat, SA cenderung memberi <b>optimum global</b>.</li>
+  <li>Aplikasi: layout VLSI, penjadwalan pesawat/KAI.</li>
+</ul>
+
+<h4>3. Genetic Algorithm (GA)</h4>
+<ul>
+  <li>Berdasarkan <b>seleksi alam</b> pada <b>populasi state</b> (kromosom).</li>
+  <li>Konsep: fitness → select parent → cross-over → mutation → populasi baru.</li>
+</ul>
+<ol>
+  <li><b>Encoding:</b> representasi kromosom (string bit/angka).</li>
+  <li><b>Initialization:</b> populasi awal acak.</li>
+  <li><b>Fitness function:</b> ukur kualitas tiap kromosom.</li>
+  <li><b>Selection:</b> pilih parent (fitness tinggi → peluang besar).</li>
+  <li><b>Crossover:</b> kombinasi dua parent → anak baru.</li>
+  <li><b>Mutation:</b> ubah kecil kromosom baru.</li>
+  <li>Ulangi sampai solusi baik / iterasi habis.</li>
+</ol>
+<div class="tip"><b>Contoh 8-queens</b> pada GA:<br>
+Kromosom = posisi 8 ratu (1 per kolom). Fitness = jumlah pasangan ratu <i>tidak saling serang</i>.<br>
+Selection → 31%, 29%, 26%, 14% (probabilitas proporsional fitness); crossover: 32752411 + 24748552 → anak 32748552.</div>
+
+<h3>Adversarial Search (Games)</h3>
+<p>Environment kompetitif: <b>satu agen menang = agen lain kalah</b>. Perlu <b>perkiraan lawan</b> dan <b>pencarian sampai kedalaman tertentu</b>.</p>
+
+<h4>Minimax</h4>
+<ul>
+  <li>Untuk game <b>deterministik 2-pemain</b>. Asumsikan lawan bermain optimal.</li>
+  <li><b>MAX</b> (kita) maksimalkan nilai; <b>MIN</b> (lawan) minimalkan nilai.</li>
+  <li><b>Sifat:</b> Complete (pohon terbatas) • Optimal (vs lawan terbaik) • Waktu O(b^m) • Ruang O(b·m).</li>
+  <li>Di game besar (catur: b≈35, m≈100) eksplorasi penuh tak mungkin.</li>
+</ul>
+
+<h4>Alpha-Beta Pruning (α-β)</h4>
+<ul>
+  <li>Optimasi: <b>pangkas cabang</b> yang tidak mempengaruhi hasil.</li>
+  <li><b>α</b> = batas terbaik untuk MAX; <b>β</b> = batas terbaik untuk MIN.</li>
+  <li>Jika nilai node kurang dari α / lebih dari β → berhenti menjelajah cabang.</li>
+  <li>Efektif dengan urutan langkah baik: <b>O(b^(m/2))</b> (perluasan 2x kedalaman).</li>
+  <li>Hasil akhir <b>sama</b> dengan minimax, hanya lebih cepat.</li>
+</ul>
+<div class="warn">Ingat: <b>pruning tidak mengubah hasil akhir</b>, hanya mempercepat.</div>
+
+<h4>Contoh nyata Game AI</h4>
+<ul>
+  <li><b>Chinook</b> (checkers): mengalahkan juara dunia Marion Tinsley (1994).</li>
+  <li><b>Deep Blue</b> (catur): mengalahkan Garry Kasparov (1997), 200 juta posisi/detik.</li>
+  <li><b>Go</b>: branch &gt; 300 → pakai pattern knowledge.</li>
+  <li><b>AlphaZero</b>: menang di catur/Go/Shogi via self-play (modern reinforcement).</li>
+</ul>
+`},
+{
+  tag:'M7',
+  title:'Planning Agent',
+  short:'STRIPS, plan-space search, POP, kaitannya dengan agentic AI.',
+  html:`<h3>Planning vs Problem Solving</h3>
+<ul>
+  <li>Planning = <b>membuat rencana (sequence of actions) untuk mencapai goal</b> dalam kondisi + aksi.</li>
+  <li>Persoalan planning sering <b>non-deterministik</b>: start bisa di beberapa state sekaligus (sets of atomic states).</li>
+  <li>Pencarian per-state (enumerasi) → <b>tidak efisien</b> (eksponen dari jumlah state).</li>
+  <li>Solusinya: deskripsikan state <b>sebagai logika</b> (proposisi), bukan enumerasi. → lebih ringkas.</li>
+</ul>
+<div class="exam"><b>Situation Calculus:</b><br>
+Satu bentuk planning klasik: <span class="kbd">Result(North, Result(Grab, Result(South, S0)))</span><br>
+— membangun situasi hasil aksi secara berlapis. Baca dari dalam: <b>South → Grab → North</b>.</div>
+
+<h3>Representasi STRIPS (fokus utama)</h3>
+<p>Bahasa khusus untuk state, goal, action:</p>
+<table>
+  <tr><th>Komponen</th><th>Bentuk</th></tr>
+  <tr><td><b>State</b></td><td>Konjungsi <b>positive &amp; negatif literals</b> (contoh: <span class="kbd">At(robot,r3) ∧ Closed(door6)</span>)</td></tr>
+  <tr><td><b>Goal</b></td><td>Konjungasi literal (misal: <span class="kbd">Have(Milk) ∧ Have(Banana)</span>)</td></tr>
+  <tr><td><b>Action/Operator</b></td><td>Nama + <b>Precondition</b> + <b>Effects</b> (add-list &amp; delete-list)</td></tr>
+</table>
+<h4>Contoh Operasi STRIPS</h4>
+<p><span class="kbd">Go(x,y)</span> : Pre <span class="kbd">At(x)</span> • Eff <span class="kbd">At(y), ¬At(x)</span><br>
+<span class="kbd">Buy(x,store)</span> : Pre <span class="kbd">At(store) ∧ Sells(store,x)</span> • Eff <span class="kbd">Have(x)</span></p>
+
+<h3>Planning Algorithms</h3>
+<table>
+  <tr><th></th><th>Progression</th><th>Regression</th></tr>
+  <tr><td>Arah</td><td>Maju (search langsung dari start, terapkan aksi)</td><td>Mundur (dari goal → cari kondisi sebelum aksi)</td></tr>
+  <tr><td>Fokus</td><td>Efek semua aksi dari state saat ini (besar percabangan)</td><td>Apa yang harus true sebelum goal</td></tr>
+  <tr><td>Kekurangan</td><td>Besar percabangan</td><td>Butuh direction (aksi mana dulu)</td></tr>
+</table>
+
+<h3>Plan-Space Planning &amp; POP</h3>
+<ul>
+  <li><b>Plan-space:</b> mulai dari <b>rencana kosong</b>, tambahkan step demi step. Pisah antara <b>urutan (order)</b> dan <b>pelaksanaan (execution)</b>.</li>
+  <li><b>Least-commitment:</b> tunda keputusan yang belum perlu.</li>
+  <li><b>Means-ends analysis:</b> cocokkan sarana (action) dengan tujuan.</li>
+</ul>
+<h4>Partially Ordered Plan (POP) = 4 elemen</h4>
+<table>
+  <tr><th>Komponen</th><th>Arti</th></tr>
+  <tr><td><b>Steps</b></td><td>Kumpulan operator (langkah dalam rencana)</td></tr>
+  <tr><td><b>Ordering constraints</b></td><td>Urutan: <span class="kbd">Si &lt; Sj</span> (langkah i mendahului j)</td></tr>
+  <tr><td><b>Variable bindings</b></td><td>Nilai variabel: <span class="kbd">v = x</span></td></tr>
+  <tr><td><b>Causal links</b></td><td><span class="kbd">Si →c Sj</span>: langkah i memenuhi prasyarat c untuk langkah j</td></tr>
+</table>
+
+<h3>Syarat Plan Lengkap &amp; Konsisten</h3>
+<ul>
+  <li><b>Complete:</b> setiap <em>precondition</em> dipenuhi oleh beberapa step lain.</li>
+  <li><b>Konsisten:</b> ordering + binding konsisten (tiada konflik) .</li>
+  <li><b>Threat:</b> step S mengancam causal link Si →c Sj jika <span class="kbd">¬c ∈ effects(S)</span> dan bisa diletakkan di antara. Resolve: <b>Promote</b> (S sebelum Si) atau <b>Demote</b> (S sesudah Sj).</li>
+</ul>
+
+<h3>POP Algorithm</h3>
+<ol>
+  <li>Buat initial plan (start &lt; finish).</li>
+  <li>Ulangi sampai plan lengkap: pilih subgoal → pilih operator → <b>resolve threats</b>.</li>
+  <li>Cek konsistensi, jika plan berubah → loop.</li>
+</ol>
+
+<div class="exam"><b>Latihan:</b><br>
+Goal <span class="kbd">Have(Milk) ∧ Have(Banana) ∧ Have(Drill)</span>, start <span class="kbd">At(Home)</span>.<br>
+Gunakan action <span class="kbd">Go</span> dan <span class="kbd">Buy</span> → rentetan pergi ke store, beli, kembali. POP memberi kebebasan urutan (buat 2 toko berbeda waktu).</div>
+
+<h3>Hubungan dengan Agentic AI</h3>
+<ul>
+  <li>Konsep planning klasik ber-evolusi menjadi <b>CoT, ToT, ReAct (Reason + Act)</b>.</li>
+  <li>Agentic AI = realisasi modern dari planning, dengan <b>tools + memory + planning + oversight</b>.</li>
+  <li>AI tidak hanya menyusun rencana di "kertas", tapi mengeksekusi tugas kompleks end-to-end.</li>
+</ul>
+<div class="tip"><b>Ringkasan minggu 2-7</b> alur materi: memahami 4 pendekatan AI (M1) → agent cerdas (M2) → problem &amp; state (M3) → metode search (M4) → CSP (M5) → local/adversarial (M6) → planning (M7).</div>
+`},
+{
+  tag:'M8',
+  title:'Pembahasan UTS 24-25 (Lengkap)',
+  short:'Soal UTS semester lalu + pembahasan detail: PG, Genetic Algorithm, CSP, Rule-Based.',
+  html:`<div class="exam"><b>Info UTS 24-25.</b> IF3111 Inteligensi Buatan · 14 Oktober 2024 · Open Sheet · 120 menit · Dosen: Meida Cahyo Untoro / Andika Setiawan. Terdiri dari 10 soal PG (30 poin) + 3 soal essay (70 poin).</div>
+
+<h3>Bagian 1 — Pilihan Ganda (30 poin)</h3>
+
+<p><b>Soal 1.</b> Berikut ini yang tidak mencerminkan karakteristik AI berdasarkan definisi AI adalah...</p>
+<ul>
+  <li>a. Thinking humanly &nbsp; b. Thinking rationally &nbsp; c. Acting rationally &nbsp; <b>d. Acting generally</b> &nbsp; e. Acting humanly</li>
+</ul>
+<div class="tip"><b>Jawaban: d.</b> Definisi AI hanya dikenal 4 pendekatan (thinking/acting, humanly/rationally). "Acting generally" bukan istilah yang dikenal dalam definisi AI.</div>
+
+<p><b>Soal 2.</b> Pada gambar arsitektur agen (lingkungan → percepts → agen → aksi), aspek yang menjadi media penerima informasi dari lingkungan adalah...</p>
+<ul>
+  <li>a. Actuator &nbsp; b. Effector &nbsp; <b>c. Sensor</b> &nbsp; d. Environment &nbsp; e. Agent program</li>
+</ul>
+<div class="tip"><b>Jawaban: c. Sensor.</b> Sensor = komponen penerima percepts (input) dari lingkungan. Actuator/effector justru mengeluarkan aksi ke lingkungan.</div>
+
+<p><b>Soal 3.</b> Turing Test merupakan salah satu bentuk pendekatan yang membuktikan kecerdasan buatan pada sifat...</p>
+<ul>
+  <li>a. Thinking humanly &nbsp; b. Thinking rationally &nbsp; c. Acting rationally &nbsp; d. Acting generally &nbsp; <b>e. Acting humanly</b></li>
+</ul>
+<div class="tip"><b>Jawaban: e. Acting humanly.</b> Turing Test menguji apakah mesin dapat <i>bertindak/berperilaku</i> sehingga tidak dibedakan dari manusia — bukan membuktikan proses berpikirnya.</div>
+
+<p><b>Soal 4.</b> Perangkat lunak yang mampu mengumpulkan informasi dari lingkungan dan mengambil tindakan atau aksi berdasarkan informasi yang dikumpulkannya adalah...</p>
+<ul>
+  <li>a. Sensors &nbsp; b. Environment &nbsp; c. Architecture &nbsp; <b>d. Agent</b> &nbsp; e. Actuators</li>
+</ul>
+<div class="tip"><b>Jawaban: d. Agent.</b> Definisi klasik agen: entitas yang mempersepsi lingkungan melalui sensor dan bertindak melalui actuator.</div>
+
+<p><b>Soal 5.</b> Berikut ini yang menjadi kriteria untuk mengukur keberhasilan perilaku agen (rational agents) adalah...</p>
+<ul>
+  <li>a. Performance evaluation &nbsp; <b>b. Performance measure</b> &nbsp; c. Performance matrix &nbsp; d. Performance index &nbsp; e. Performance task</li>
+</ul>
+<div class="tip"><b>Jawaban: b. Performance measure.</b> Dalam PEAS, <i>performance measure</i> mendefinisikan kriteria sukses perilaku agen (seberapa benar/t cepat/efektif aksinya).</div>
+
+<p><b>Soal 6.</b> Berikut ini merupakan jenis-jenis environment dalam sistem agen AI, kecuali...</p>
+<ul>
+  <li>a. Deterministic vs Stochastic &nbsp; b. Episodic vs Sequential &nbsp; c. Fully Observable vs Partially Observable &nbsp; d. Static vs Dynamic &nbsp; <b>e. Supervised vs Unsupervised</b></li>
+</ul>
+<div class="tip"><b>Jawaban: e.</b> Supervised vs Unsupervised adalah <b>jenis pembelajaran mesin (machine learning)</b>, bukan sifat environment. Delapan sifat environment: observable, deterministic, episodic, static, discrete, single/multi agent.</div>
+
+<p><b>Soal 7.</b> Jenis agen AI yang memiliki kemampuan memperbarui model internalnya berdasarkan pengamatan dari lingkungan adalah...</p>
+<ul>
+  <li>a. Simple Reflex Agent &nbsp; b. Model-Based Reflex Agent &nbsp; c. Goal-Based Agent &nbsp; d. Utility-Based Agent &nbsp; <b>e. Learning Agent</b></li>
+</ul>
+<div class="tip"><b>Jawaban: e. Learning Agent.</b> Learning agent punya komponen <i>learning element</i> yang memperbaiki model/kebijakan berdasarkan pengalaman dari lingkungan.</div>
+
+<p><b>Soal 8.</b> Dalam pendekatan PEAS untuk robot pembersih lantai otomatis, yang termasuk dalam kategori actuators adalah...</p>
+<ul>
+  <li>a. Kamera (sensor visual) &nbsp; b. Sensor inframerah &nbsp; c. Baterai &nbsp; <b>d. Motor penggerak roda untuk menggerakkan robot</b> &nbsp; e. Algoritma rute pembersihan</li>
+</ul>
+<div class="tip"><b>Jawaban: d.</b> Actuator = komponen yang mengeksekusi aksi. Motor penggerak roda menggerakkan robot. Kamera &amp; IR = sensor; baterai = bagian platform; algoritma = program agen.</div>
+
+<p><b>Soal 9.</b> Berikut algoritma uninformed search, kecuali yang menggunakan informasi tambahan seberapa dekat keadaan dengan goal...</p>
+<ul>
+  <li>a. Breadth-First Search &nbsp; b. Depth-First Search &nbsp; <b>c. Greedy Best-First Search</b> &nbsp; d. Uniform Cost Search &nbsp; e. Iterative Deepening Search</li>
+</ul>
+<div class="tip"><b>Jawaban: c.</b> Greedy Best-First memakai heuristic h(n) = estimasi jarak ke goal, sehingga termasuk <b>informed search</b>. BFS, DFS, UCS, IDS = uninformed (buta).</div>
+
+<p><b>Soal 10.</b> Pernyataan yang paling tepat mengenai perbedaan antara search strategies dan problem solving adalah...</p>
+<ul>
+  <li><b>b. Search strategies fokus pada pencarian jalur menuju solusi, sedangkan problem solving lebih luas mencakup perumusan masalah dan pemilihan solusi</b></li>
+</ul>
+<div class="tip"><b>Jawaban: b.</b> Search strategy = teknik eksplorasi ruang state (BFS, DFS, A*, dll). Problem solving = proses lengkap: memahami/perumusan masalah → representasi → mencari → memilih/mengevaluasi solusi.</div>
+
+<h3>Bagian 2 — Essay 1: Complex Local Search (Genetic Algorithm) — 25 poin</h3>
+<p><b>Kasus:</b> Penjadwalan 6 MK inti (A Algoritma, B Sistem Operasi, C Struktur Data, D Jaringan Komputer, E Kecerdasan Buatan, F Pemrograman Web), 3 dosen tetap, 3 ruangan, 5 hari × 5 sesi = 25 slot. Setiap MK 4 SKS butuh 2 sesi/minggu (total 12 sesi). Tujuan: minimalkan bentrok ruangan/dosen dan alokasi yang tidak adil.
+
+<p><b>a. (15 poin) Proses Seleksi, Crossover, dan Mutasi dengan Roulette Wheel Selection</b></p>
+
+<h3>Representasi Kromosom</h3>
+<p>Setiap individu (kromosom) = satu jadwal lengkap. Misal representasi gen per MK:</p>
+<table>
+  <tr><th>Gen</th><th>Isi</th><th>Nilai</th></tr>
+  <tr><td>Gen untuk tiap MK (12 sesi total)</td><td>Slot waktu (0–24), dosen (1–3), ruangan (1–3)</td><td>Contoh: (MK=A, slot=7, dosen=1, ruang=2)</td></tr>
+</table>
+<p><b>Fitness</b> = skor jadwal: kurangi jumlah bentrok (dosen/ruangan di slot sama), plus penalti beban tidak adil (dosen terlalu banyak/menanggung kosong), plus bonus kecocokan preferensi dosen.</p>
+
+<h3>1. Seleksi — Roulette Wheel Selection</h3>
+<ol>
+  <li>Hitung total fitness seluruh populasi: F_total = Σ fitness(i).</li>
+  <li>Hitung peluang tiap individu: p(i) = fitness(i) / F_total. Individu dengan fitness tinggi mendapat "irisan" roda lebih besar.</li>
+  <li>Putar roda (bilangan acak 0–1) sebanyak yang dibutuhkan untuk memilih induk. Individu fit sering terpilih, tapi individu kurang fit masih punya peluang kecil → menjaga keragaman genetik.</li>
+</ol>
+
+<h3>2. Crossover (Rekombinasi)</h3>
+<p>Dua induk terpilih bertukar materi genetik pada titik potong acak:</p>
+<pre>P_Induk1: [A-s1-d1-r1][B-s5-d2-r2][C-s9-d3-r3][D-s13-...][E-s17-...][F-s21-...]
+P_Induk2: [A-s3-d2-r2][B-s7-d1-r1][C-s11-d2-r2][D-s15-...][E-s19-...][F-s23-...]
+                 ↓ titik potong setelah gen ke-3
+C_Induk1: [A-s1-d1-r1][B-s5-d2-r2][C-s9-d3-r3] | [D-s15-...][E-s19-...][F-s23-...]
+C_Induk2: [A-s3-d2-r2][B-s7-d1-r1][C-s11-d2-r2] | [D-s13-...][E-s17-...][F-s21-...]
+</pre>
+<p>Crossover menggabungkan "blok jadwal yang sudah baik" dari dua orang tua — misal individu 1 unggul penjadwalan MK A–C, individu 2 unggul di D–F, keturunannya bisa mengambil yang terbaik dari keduanya.</p>
+
+<h3>3. Mutasi</h3>
+<p>Untuk menjaga agar tidak terjebak di solusi lokal dan memperbaiki jadwal yang masih bentrok, tiap gen punya peluang kecil bermutasi:</p>
+<ul>
+  <li><b>Swap mutation:</b> tukar slot dua MK agar bentrok berkurang.</li>
+  <li><b>Random reset:</b> ubah satu gen (misal dosen/ruangan) ke nilai baru yang legal.</li>
+  <li><b>Repair mutation:</b> jika deteksi bentrok dosen/ruangan pada slot sama, geser salah satu MK ke slot kosong lain.</li>
+</ul>
+
+<h3>Menghasilkan Jadwal Lebih Baik di Generasi Berikutnya</h3>
+<ol>
+  <li>Roulette wheel → individu fit jadi induk (seleksi tekanan alamiah).</li>
+  <li>Crossover → transfer kombinasi gen yang baik antar induk.</li>
+  <li>Mutasi → variasi kecil, memperbaiki bentrok sisa, cegah konvergensi dini.</li>
+  <li><i>Elitism:</i> simpan 1–2 individu terbaik langsung ke generasi berikutnya agar fitness terbaik tidak hilang.</li>
+  <li>Ulangi beberapa generasi → rata-rata fitness naik → jadwal makin minim bentrok &amp; makin adil.</li>
+</ol>
+
+<p><b>b. (10 poin) Adaptasi dengan Perubahan Ketersediaan Dosen</b></p>
+<ol>
+  <li><b>Perbarui fitness function / ruang solusi:</b> tambahkan constraint baru (dosen X tidak tersedia hari Y) sebagai <i>hard constraint</i> — individu yang menempatkan dosen X di hari Y diberi fitness 0 atau penalti besar, sehingga hampir mustahil terpilih oleh roulette wheel.</li>
+  <li><b>Repair pada populasi eksisting:</b> alih-alih mulai dari nol, ambil populasi terbaik saat ini dan lakukan <i>repair mutation</i> hanya pada gen yang melanggar ketersediaan baru (geser sesi dosen ke hari/slot lain yang kosong).</li>
+  <li><b>Elitism + injeksi variasi baru:</b> pertahankan individu yang tidak terpengaruh perubahan; sisipkan sebagian individu acak baru untuk mengeksplorasi ruang solusi yang baru.</li>
+  <li><b>Iterasi GA kembali:</b> jalankan seleksi–crossover–mutasi lagi beberapa generasi. Melalui regenerasi, kombinasi jadwal baru yang legal akan muncul dan fitness rata-rata pulih.</li>
+</ol>
+<div class="tip"><b>Inti:</b> GA tangguh terhadap perubahan karena cukup mengubah fungsi fitness/constraint dan melanjutkan evolusi — tidak perlu menghitung ulang solusi dari awal seperti metode eksak.</div>
+
+<h3>Bagian 3 — Essay 2: Constraint Satisfaction Problem (CSP) — 25 poin</h3>
+<p><b>Kasus:</b> 5 MK (A Algoritma, B Struktur Data, C Sistem Operasi, D Jaringan Komputer, E Kecerdasan Buatan) · 2 lab (Lab1, Lab2) · 4 slot {1,2,3,4}. Lab1 khusus A, B, E; Lab2 khusus C, D. Constraints awal: (1) A di slot 1; (2) B setelah A; (3) D sebelum C; (4) E bebas tapi di Lab1; (5) maks 1 MK per slot per lab.</p>
+
+<p><b>a. (15 poin) Tambahkan dua constraint:</b></p>
+<ol>
+  <li><b>B dan C harus di hari berbeda</b> → karena B hanya mungkin di Lab1 dan C hanya mungkin di Lab2, constraint ini otomatis terpenuhi <i>selama</i> B dan C tidak ditempatkan pada slot waktu yang sama. Jadi constraint tersembunyi: <b>slot(B) ≠ slot(C)</b>.</li>
+  <li><b>A dan E tidak boleh di slot berturut-turut</b> → |slot(A) − slot(E)| ≠ 1, yaitu slot(E) ∉ {2} jika A = 1 (karena slot 0 tidak ada). Karena A=1, E hanya boleh di slot 3 atau 4.</li>
+</ol>
+<p>Dengan A=1, B di {2,3,4}, D di slot sebelum C, dan maks 1 MK per slot per lab, penyelesaian yang valid adalah:</p>
+<table>
+  <tr><th>MK</th><th>Lab</th><th>Slot</th></tr>
+  <tr><td>A (Algoritma)</td><td>Lab1</td><td>1</td></tr>
+  <tr><td>B (Struktur Data)</td><td>Lab1</td><td>3 atau 4</td></tr>
+  <tr><td>E (Kecerdasan Buatan)</td><td>Lab1</td><td>4 atau 3</td></tr>
+  <tr><td>D (Jaringan Komputer)</td><td>Lab2</td><td>1 atau 2</td></tr>
+  <tr><td>C (Sistem Operasi)</td><td>Lab2</td><td>3 atau 4 (setelah D)</td></tr>
+</table>
+<p>Contoh assignment valid: A=slot1/Lab1, D=slot1/Lab2, C=slot3/Lab2, B=slot3/Lab1, E=slot4/Lab1. (D &amp; C beda slot karena D harus sebelum C; B &amp; E tidak bentrok karena beda slot di Lab1.)</p>
+
+<p><b>b. (10 poin) Graf CSP dan cara kerjanya</b></p>
+<p><b>Nodes (variabel):</b> A, B, C, D, E.<br>
+<b>Edges (binary constraints) — pasangan variabel yang saling terkait:</b></p>
+<table>
+  <tr><th>Edge</th><th>Constraint</th></tr>
+  <tr><td>A — B</td><td>slot(B) &gt; slot(A) (B setelah A)</td></tr>
+  <tr><td>B — C</td><td>slot(B) ≠ slot(C) (hari berbeda)</td></tr>
+  <tr><td>C — D</td><td>slot(D) &lt; slot(C) (D sebelum C)</td></tr>
+  <tr><td>A — E</td><td>|slot(A) − slot(E)| ≠ 1 (tidak berturut-turut)</td></tr>
+</table>
+<p>Constraint lain bersifat <b>unary/assignment</b> (A=slot1; domain B={2,3,4}; domain E⊆{3,4} di Lab1; D, C di Lab2) sehingga tidak perlu jadi edge, cukup mempersempit domain.</p>
+
+<h3>Bagaimana graf membantu menyelesaikan CSP</h3>
+<ol>
+  <li><b>Mempersempit domain (forward checking):</b> setiap kali satu variabel diberi nilai, langsung lihat tetangganya di graf dan hapus nilai yang melanggar. Contoh: setelah A=slot1, tetangga A (B dan E) langsung kehilangan beberapa opsi.</li>
+  <li><b>Deteksi ambang batas:</b> jika tetangga saling terlalu banyak mempersempit, kekosongan domain terdeteksi cepat → backtrack, bukan eksplorasi buta.</li>
+  <li><b>Minimum Degree Heuristic:</b> pilih variabel dengan tetangga terbanyak (degree tertinggi) untuk dikerjakan lebih dulu, agar konflik terselesaikan sejak awal. Di sini B dan C punya degree 2 — dikerjakan setelah A.</li>
+  <li><b>AC-3 (Arc Consistency):</b> menghapus nilai dari domain tiap variabel yang tidak punya nilai konsisten pada tetangganya, mengurangi ruang pencarian drastis sebelum backtracking dimulai.</li>
+  <li><b>Backtracking:</b> jika percobaan mentok, mundur satu langkah dan coba nilai lain pada variabel sebelumnya.</li>
+</ol>
+
+<h3>Bagian 4 — Essay 3: Backward/Forward Chaining (Rule-Based) — 20 poin</h3>
+<p><b>Aturan:</b></p>
+<ol>
+  <li>Algoritma ∧ Struktur Data → Pemrograman Lanjut</li>
+  <li>Basis Data → Manajemen Basis Data</li>
+  <li>Struktur Data ∧ Matematika Diskrit → Algoritma</li>
+  <li>Jaringan Komputer ∧ Sistem Operasi → Keamanan Jaringan</li>
+  <li>Algoritma → Pemrograman Paralel</li>
+  <li>Sistem Terdistribusi ∧ Keamanan Jaringan → Cloud Computing</li>
+  <li>Pemrograman Lanjut → Keamanan Jaringan</li>
+  <li>Keamanan Jaringan ∧ Cloud Computing → Cybersecurity</li>
+</ol>
+<p><b>Fakta awal:</b> mahasiswa sudah mengambil Struktur Data, Matematika Diskrit, Jaringan Komputer, Sistem Operasi.</p>
+
+<p><b>Pertanyaan:</b> Buktikan mahasiswa memenuhi syarat mengambil Cybersecurity menggunakan Backward Chaining ATAU Forward Chaining.</p>
+
+<h3>Forward Chaining (bukti dari fakta ke kesimpulan)</h3>
+<table>
+  <tr><th>Langkah</th><th>Fakta/Rule</th><th>Fakta baru</th></tr>
+  <tr><td>1</td><td>Fakta awal</td><td>Struktur Data ✓, Matematika Diskrit ✓, Jaringan Komputer ✓, Sistem Operasi ✓</td></tr>
+  <tr><td>2</td><td>R3: Struktur Data ∧ Matematika Diskrit → Algoritma</td><td>+ Algoritma</td></tr>
+  <tr><td>3</td><td>R1: Algoritma ∧ Struktur Data → Pemrograman Lanjut</td><td>+ Pemrograman Lanjut</td></tr>
+  <tr><td>4</td><td>R7: Pemrograman Lanjut → Keamanan Jaringan</td><td>+ Keamanan Jaringan</td></tr>
+  <tr><td>5</td><td>R4: Jaringan Komputer ∧ Sistem Operasi → Keamanan Jaringan</td><td>(konfirmasi redundan)</td></tr>
+  <tr><td>6</td><td>R5: Algoritma → Pemrograman Paralel</td><td>+ Pemrograman Paralel</td></tr>
+  <tr><td>7</td><td>R6: Sistem Terdistribusi ∧ Keamanan Jaringan → Cloud Computing</td><td>✗ <b>Sistem Terdistribusi BELUM diambil</b> → Cloud Computing tidak dapat diturunkan</td></tr>
+  <tr><td>8</td><td>R8: Keamanan Jaringan ∧ Cloud Computing → Cybersecurity</td><td>✗ Cloud Computing tidak ada → <b>Cybersecurity TIDAK terbukti</b></td></tr>
+</table>
+
+<h3>Backward Chaining (bukti dari tujuan ke fakta)</h3>
+<ol>
+  <li><b>Goal: Cybersecurity</b> → butuh R8: Keamanan Jaringan ∧ Cloud Computing.</li>
+  <li>Sub-goal <b>Keamanan Jaringan</b> ✓ — terbukti lewat R7 (Pemrograman Lanjut → Keamanan Jaringan) dan langsung lewat R4 (Jaringan Komputer ∧ Sistem Operasi → Keamanan Jaringan). Keduanya didukung fakta awal.</li>
+  <li>Sub-goal <b>Cloud Computing</b> — butuh R6: Sistem Terdistribusi ∧ Keamanan Jaringan. Keamanan Jaringan sudah ✓, tapi <b>Sistem Terdistribusi tidak ada di fakta awal</b>.</li>
+  <li>Sub-goal <b>Sistem Terdistribusi</b> — tidak punya rule apapun yang menghasilkannya, dan bukan fakta awal. ✗ Mentok.</li>
+  <li><b>Kesimpulan:</b> rantai bukti terputus di sub-goal Sistem Terdistribusi. <b>Mahasiswa BELUM memenuhi syarat mengambil Cybersecurity</b> — minimal harus menyelesaikan Sistem Terdistribusi dulu, baru R6 dan R8 bisa aktif.</li>
+</ol>
+<div class="warn"><b>Jawaban kunci:</b> kedua metode (forward &amp; backward chaining) memberi hasil sama — <b>Cybersecurity TIDAK dapat dibuktikan</b> dengan fakta yang diberikan, karena Rule 6 mensyaratkan <i>Sistem Terdistribusi</i> yang belum diambil mahasiswa.</div>
+`}
+];
+const nav=document.getElementById('nav');
+const box=document.getElementById('modules');
+function render(){
+  nav.innerHTML='';
+  DATA.forEach(function(m){
+    const b=document.createElement('button');
+    b.textContent=m.tag+'  '+m.title.split(':')[0];
+    b.onclick=function(){jump(m.tag)};
+    nav.appendChild(b);
+  });
+  box.innerHTML='';
+  DATA.forEach(function(m){
+    const card=document.createElement('div');
+    card.className='card';
+    card.innerHTML='<div class="card-head">'+
+      '<div class="badge">'+m.tag+'</div>'+
+      '<h2>'+m.title+'</h2>'+
+      '<span class="tag">'+m.short+'</span>'+
+      '<span class="chev">&#9654;</span>'+
+      '</div>'+
+      '<div class="card-body">'+m.html+'</div>';
+    card.querySelector('.card-head').addEventListener('click',function(){card.classList.toggle('open');});
+    box.appendChild(card);
+  });
+}
+function jump(tag){
+  const idx=DATA.findIndex(function(m){return m.tag===tag;});
+  if(idx<0)return;
+  const cards=box.querySelectorAll('.card');
+  cards.forEach(function(c){c.classList.remove('open');});
+  cards[idx].classList.add('open');
+  cards[idx].scrollIntoView({behavior:'smooth',block:'start'});
+}
+render();
+</script>
+</body>
+</html>

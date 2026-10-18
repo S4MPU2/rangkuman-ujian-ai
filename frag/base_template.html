@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Rangkuman Ujian AI - Minggu 1-7</title>
+<style>
+:root{
+  --bg:#0f172a;--panel:#1e293b;--panel2:#273549;--txt:#e2e8f0;--muted:#94a3b8;
+  --accent:#38bdf8;--accent2:#a78bfa;--good:#4ade80;--warn:#fbbf24;--bad:#f87171;--line:#3b4a63;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--txt);font-family:'Segoe UI',system-ui,-apple-system,Arial,sans-serif;line-height:1.6}
+header{position:sticky;top:0;z-index:50;background:linear-gradient(135deg,#1e3a8a 0%,#6d28d9 100%);padding:18px 16px 14px;text-align:center;box-shadow:0 3px 14px rgba(0,0,0,.45)}
+header h1{font-size:1.35rem;letter-spacing:.3px}
+header p{font-size:.85rem;opacity:.92;margin-top:2px}
+nav{max-width:960px;margin:14px auto 0;padding:0 14px;display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
+nav button{background:var(--panel2);color:var(--txt);border:1px solid var(--line);padding:.45rem .8rem;border-radius:999px;cursor:pointer;font-size:.82rem;transition:.15s}
+nav button:hover{border-color:var(--accent);color:var(--accent)}
+main{max-width:960px;margin:0 auto;padding:16px 14px 60px}
+.intro{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px 16px;margin-bottom:18px;font-size:.9rem;color:var(--muted)}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;margin-bottom:16px;overflow:hidden}
+.card-head{display:flex;align-items:center;gap:12px;padding:14px 16px;cursor:pointer;user-select:none}
+.card-head:hover{background:var(--panel2)}
+.badge{flex:none;width:42px;height:42px;border-radius:10px;background:linear-gradient(135deg,#2563eb,#7c3aed);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.95rem}
+.card-head h2{font-size:1.02rem;flex:1}
+.card-head .tag{font-size:.7rem;background:#0f172a;border:1px solid var(--line);color:var(--accent);padding:2px 8px;border-radius:999px;white-space:nowrap}
+.chev{transition:.2s;color:var(--muted);font-weight:700}
+.card.open .chev{transform:rotate(90deg)}
+.card-body{display:none;padding:4px 18px 18px;border-top:1px dashed var(--line)}
+.card.open .card-body{display:block}
+.card-body h3{font-size:.95rem;color:var(--accent);margin:16px 0 6px;padding-left:9px;border-left:3px solid var(--accent)}
+.card-body ul,.card-body ol{margin:4px 0 8px 20px}
+.card-body li{margin:3px 0;font-size:.9rem}
+.card-body p{font-size:.9rem;margin:6px 0}
+.kbd{background:#0b1220;border:1px solid var(--line);padding:1px 6px;border-radius:5px;font-size:.82rem;color:var(--warn);font-family:Consolas,monospace}
+table{width:100%;border-collapse:collapse;margin:8px 0 12px;font-size:.82rem}
+th,td{border:1px solid var(--line);padding:6px 8px;text-align:left;vertical-align:top}
+th{background:var(--panel2);color:var(--accent)}
+td.yes{color:var(--good);font-weight:700}
+td.no{color:var(--bad);font-weight:700}
+.tip{background:#132a4a;border-left:4px solid var(--accent);padding:8px 12px;border-radius:0 8px 8px 0;margin:8px 0;font-size:.87rem}
+.warn{background:#3a2e13;border-left:4px solid var(--warn);padding:8px 12px;border-radius:0 8px 8px 0;margin:8px 0;font-size:.87rem}
+.exam{background:#3a1533;border-left:4px solid var(--bad);padding:8px 12px;border-radius:0 8px 8px 0;margin:8px 0;font-size:.87rem}
+footer{text-align:center;color:var(--muted);font-size:.8rem;padding:20px 14px 34px}
+@media (max-width:560px){.card-head h2{font-size:.92rem}.card-head .tag{display:none}}
+</style>
+</head>
+<body>
+<header>
+  <h1>Rangkuman Ujian Kecerdasan Buatan</h1>
+  <p>Materi Ringkas dan Terperinci - Modul Minggu 1 sampai 7 (IF25-22016)</p>
+</header>
+<nav id="nav"></nav>
+<main>
+  <div class="intro">
+    <strong>Cara pakai:</strong> klik judul modul untuk membuka atau menutup ringkasan. Setiap poin sudah
+    dipadatkan dari slide perkuliahan, lengkap dengan <em>tips ujian</em> dan tabel hafalan cepat.
+    Tombol di atas bisa melompat langsung ke modul tertentu.
+  </div>
+  <div id="modules"></div>
+</main>
+<footer>Dibuat untuk persiapan ujian besok - Sumber: slide kuliah Minggu 1-7 dan Russell-Norvig (AIMA)</footer>
+<script>
+const DATA = [
+/*MODULES*/
+];
+const nav=document.getElementById('nav');
+const box=document.getElementById('modules');
+function render(){
+  nav.innerHTML='';
+  DATA.forEach(function(m){
+    const b=document.createElement('button');
+    b.textContent=m.tag+'  '+m.title.split(':')[0];
+    b.onclick=function(){jump(m.tag)};
+    nav.appendChild(b);
+  });
+  box.innerHTML='';
+  DATA.forEach(function(m){
+    const card=document.createElement('div');
+    card.className='card';
+    card.innerHTML='<div class="card-head">'+
+      '<div class="badge">'+m.tag+'</div>'+
+      '<h2>'+m.title+'</h2>'+
+      '<span class="tag">'+m.short+'</span>'+
+      '<span class="chev">&#9654;</span>'+
+      '</div>'+
+      '<div class="card-body">'+m.html+'</div>';
+    card.querySelector('.card-head').addEventListener('click',function(){card.classList.toggle('open');});
+    box.appendChild(card);
+  });
+}
+function jump(tag){
+  const idx=DATA.findIndex(function(m){return m.tag===tag;});
+  if(idx<0)return;
+  const cards=box.querySelectorAll('.card');
+  cards.forEach(function(c){c.classList.remove('open');});
+  cards[idx].classList.add('open');
+  cards[idx].scrollIntoView({behavior:'smooth',block:'start'});
+}
+render();
+</script>
+</body>
+</html>

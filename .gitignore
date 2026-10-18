@@ -1,0 +1,7 @@
+# PDF soal UTS dan gambar sementara
+IB UTS 24-25.pdf
+frag/uts_p*.png
+
+# Jika ada file lain yang tidak diperlukan
+*.bak
+*.tmp
